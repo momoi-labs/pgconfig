@@ -38,7 +38,15 @@ function anchor(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-function createRenderer() {
+/** How a fenced block is found again among the blocks rendered at build time. */
+export function codeKey(info: string, text: string): string {
+  return `${info.trim()}\n${text}`;
+}
+
+/** Fenced blocks rendered at build time, by `codeKey`. */
+export type RenderedCode = Record<string, string>;
+
+function createRenderer(rendered: RenderedCode = {}) {
   const anchors = new Map<string, number>();
   const markdown = new Marked();
 
@@ -55,6 +63,8 @@ function createRenderer() {
         return `<h${depth} id="${id}"${role}>${html}</h${depth}>\n`;
       },
       code({ text, lang }: Tokens.Code): string {
+        const prebuilt = rendered[codeKey(lang ?? "", text)];
+        if (prebuilt) return `${prebuilt}\n`;
         const language = (lang ?? "").trim().split(/\s+/)[0];
         const name = language ? ` language-${escapeHtml(language)}` : "";
         return `<pre><code class="hljs${name}">${highlightCode(text, language)}</code></pre>\n`;
@@ -80,9 +90,12 @@ function createRenderer() {
  * Markdown as HTML that uses Kiso's own classes. A table, written in Markdown
  * or as HTML, is put in Kiso's frame so a wide one scrolls in place.
  */
-export function renderMarkdown(source: string, { breaks = false } = {}): string {
+export function renderMarkdown(
+  source: string,
+  { breaks = false, code }: { breaks?: boolean; code?: RenderedCode } = {},
+): string {
   if (!source) return "";
-  const html = createRenderer().parse(source, { async: false, breaks });
+  const html = createRenderer(code).parse(source, { async: false, breaks });
   return html
     .replace(/<table[^>]*>/g, '<div class="table-wrap"><div class="table-scroll"><table class="table">')
     .replace(/<\/table>/g, "</table></div></div>");

@@ -9,6 +9,8 @@ import {
   NavigationList,
 } from "@momoi-labs/kiso-react";
 
+import "virtual:guide-code";
+
 import { MarkdownContent } from "../components/MarkdownContent.js";
 import { GUIDE_GROUPS, findGuidePage, guidePath } from "../guide/pages.js";
 import { DESKTOP, useMediaQuery } from "../lib/useMediaQuery.js";
@@ -73,7 +75,7 @@ export function Guide() {
 
       {page ? (
         <article className="guide-article" onClick={followGuideLink}>
-          <MarkdownContent source={page.source} />
+          <MarkdownContent source={page.source} code={page.code} />
         </article>
       ) : (
         <NotFound />

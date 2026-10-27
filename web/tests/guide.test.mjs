@@ -6,6 +6,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "vite";
 
+import { guideMarkdown } from "../guideMarkdown.ts";
+import { renderMarkdown } from "../src/lib/markdown.ts";
+import { parseMarkdownBlocks } from "../src/lib/parseMarkdownBlocks.ts";
+
 // The guide imports its Markdown as raw text, which only Vite understands, so
 // the registry is built the way the app builds it and then imported.
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -15,6 +19,7 @@ await build({
   root,
   configFile: false,
   logLevel: "silent",
+  plugins: [guideMarkdown()],
   build: {
     ssr: join(root, "src/guide/pages.ts"),
     outDir,
@@ -89,4 +94,30 @@ test("no page describes what the API no longer does", () => {
       assert.ok(!page.source.includes(stale), `"${page.slug}" still mentions ${stale}`);
     }
   }
+});
+
+// The page as MarkdownContent renders it: alerts split out, then each block.
+function renderPage({ source, code }) {
+  return parseMarkdownBlocks(source)
+    .map((block) => renderMarkdown(block.content, { code }))
+    .join("");
+}
+
+test("every fenced block of the guide is rendered at build time", () => {
+  for (const page of GUIDE_PAGES) {
+    const fences = (page.source.match(/^```\S*/gm) ?? []).length / 2;
+    const html = renderPage(page);
+    assert.ok(!html.includes('class="hljs'), `"${page.slug}" has a block left to highlight.js`);
+    assert.strictEqual(html.split('class="expressive-code"').length - 1, fences, page.slug);
+  }
+});
+
+test("a block inside an alert or with a title is rendered at build time", async () => {
+  const file = join(root, "tests/fixtures/code-blocks.md");
+  const module = await guideMarkdown().load.call({ addWatchFile() {} }, `${file}?guide`);
+  const page = JSON.parse(module.replace(/^export default /, "").replace(/;$/, ""));
+  const html = renderPage(page);
+  assert.ok(!html.includes('class="hljs'));
+  assert.strictEqual(html.split('class="expressive-code"').length - 1, 2);
+  assert.ok(html.includes("answer.json"));
 });

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Alert, AlertContent, AlertTitle } from "@momoi-labs/kiso-react";
 
-import { renderMarkdown } from "../lib/markdown.js";
+import { renderMarkdown, type RenderedCode } from "../lib/markdown.js";
 import { parseMarkdownBlocks, type AlertType } from "../lib/parseMarkdownBlocks.js";
 import { Icon, type IconName } from "./Icon.js";
 
@@ -26,16 +26,19 @@ const ALERTS: Record<
 export function MarkdownContent({
   source,
   breaks = false,
+  code,
 }: {
   source: string | undefined;
   breaks?: boolean;
+  /** Fenced blocks already rendered at build time. */
+  code?: RenderedCode;
 }) {
   const blocks = useMemo(() => parseMarkdownBlocks(source), [source]);
 
   return (
     <div className="markdown stack">
       {blocks.map((block, index) => {
-        const html = { __html: renderMarkdown(block.content, { breaks }) };
+        const html = { __html: renderMarkdown(block.content, { breaks, code }) };
         if (block.type === "markdown") {
           return <div key={index} className="markdown-body" dangerouslySetInnerHTML={html} />;
         }
