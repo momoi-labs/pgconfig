@@ -236,7 +236,7 @@
    Rendered Markdown: parameter documentation and the guide.
    --------------------------------------------------------------------------- */
 .markdown-body { min-width: 0; overflow-wrap: anywhere; }
-.markdown-body :is(p, ul, ol, pre, blockquote, .table-wrap) { margin-block: 0 var(--spacing-md); }
+.markdown-body :is(p, ul, ol, pre, blockquote, .table-wrap, .expressive-code) { margin-block: 0 var(--spacing-md); }
 .markdown-body :is(h1, h2, h3, h4) {
   margin-block: var(--spacing-xl) var(--spacing-md);
   /* A heading reached by its anchor stops below the sticky header. */

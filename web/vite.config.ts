@@ -2,6 +2,8 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+import { guideMarkdown } from "./guideMarkdown.ts";
+
 // `npm run dev` talks to a PGConfig server for everything the app does not
 // serve itself: the REST API, the Swagger UI, the MCP endpoint and the
 // parameter documentation.
@@ -11,7 +13,7 @@ const server = process.env.PGCONFIG_DEV_PROXY_TARGET ?? "http://localhost:3999";
 // not know with index.html, so assets are addressed from /.
 export default defineConfig({
   base: "/",
-  plugins: [react()],
+  plugins: [react(), guideMarkdown()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
