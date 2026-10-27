@@ -54,6 +54,8 @@ when the tools are not on the `PATH`.
 - `rules.yml`, `pg-docs.yml`, and `parameters/` are compiled into the crate by
   its `build.rs`. No YAML is parsed at run time.
 - Three v1 output formats besides JSON: `conf`, `alter_system`, `stackgres`.
+- The guide imports its pages with `?guide`. `web/guideMarkdown.ts` renders
+  their fenced blocks at build time with Expressive Code, in Kiso's colors.
 
 ## Testing
 
